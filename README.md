@@ -59,11 +59,11 @@ export PYTHONPATH=path/to/text_objseg_caffe:$PYTHONPATH
 ```
 Configure the `test_config.py` file in the directory `seg_model` and run evaluation for the high resolution language-based segmentation model:  
 ```
-python referit/test_seg_model.py
+python seg_model/test_seg_model.py
 ```  
 This should reproduce the results in the paper.
 You may also evaluate the language-based bounding box localization model:  
 ```
-python referit/test_det_model.py
+python det_model/test_det_model.py
 ```  
 The results can be compared to [this paper](http://ronghanghu.com/text_obj_retrieval/).
