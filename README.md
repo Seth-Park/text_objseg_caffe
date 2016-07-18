@@ -25,7 +25,8 @@ Project Page: http://ronghanghu.com/text_objseg
 2. Download the caffemodel for [VGG-16](https://gist.github.com/ksimonyan/211839e770f7b538e2d8#file-readme-md) network parameters trained on ImageNET 1000 classes.
 
 ### Training
-3. You may need to add the repository root directory to Python's module path: `export PYTHONPATH=/path/to/text_objseg_caffe/:$PYTHONPATH`.
+3. You may need to add the repository root directory to Python's module path:
+`export PYTHONPATH=/path/to/text_objseg_caffe/:$PYTHONPATH`.
 4. Build training batches for bounding boxes:  
 `python referit/build_training_batches_det.py`.
 5. Build training batches for segmentation:  
@@ -38,10 +39,12 @@ Project Page: http://ronghanghu.com/text_objseg
 `python referit/train_seg_model.py`.
 
 ### Evaluation
-9. You may need to add the repository root directory to Python's module path: `export PYTHONPATH=path/to/text_objseg_caffe:$PYTHONPATH`.
+9. You may need to add the repository root directory to Python's module path:
+`export PYTHONPATH=path/to/text_objseg_caffe:$PYTHONPATH`.
 10. Configure the `test_config.py` file in the directory `seg_model` and run evaluation for the high resolution language-based segmentation model:  
 `python referit/test_seg_model.py`.
 This should reproduce the results in the paper.
 11. You may also evaluate the language-based bounding box localization model:  
 `python referit/test_det_model.py`.
+
 The results can be compared to [this paper](http://ronghanghu.com/text_obj_retrieval/).
