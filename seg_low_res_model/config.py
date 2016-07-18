@@ -15,7 +15,7 @@ gpu_id = 0
 max_iter = 30000
 
 weights = '/data2/seth/nl_seg_caffe/snapshots/det/_iter_25000.caffemodel'
-fix_vgg = True 
+fix_vgg = False
 vgg_dropout = False
 mlp_dropout = False
 
