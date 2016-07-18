@@ -14,16 +14,16 @@ from models import processing_tools
 # Parameters
 ################################################################################
 
-image_dir = './exp-referit/referit-dataset/images/'
-bbox_proposal_dir = './exp-referit/data/referit_edgeboxes_top100/'
-query_file = './exp-referit/data/referit_query_trainval.json'
-bbox_file = './exp-referit/data/referit_bbox.json'
-imcrop_file = './exp-referit/data/referit_imcrop.json'
-imsize_file = './exp-referit/data/referit_imsize.json'
-vocab_file = './exp-referit/data/vocabulary_referit.txt'
+image_dir = './referit/referit-dataset/images/'
+bbox_proposal_dir = './referit/data/referit_edgeboxes_top100/'
+query_file = './referit/data/referit_query_trainval.json'
+bbox_file = './referit/data/referit_bbox.json'
+imcrop_file = './referit/data/referit_imcrop.json'
+imsize_file = './referit/data/referit_imsize.json'
+vocab_file = './referit/data/vocabulary_referit.txt'
 
 # Saving directory
-data_folder = './exp-referit/data/train_batch_det/'
+data_folder = './referit/data/train_batch_det/'
 data_prefix = 'referit_train_det'
 
 # Sample selection params

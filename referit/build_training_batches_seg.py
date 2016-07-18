@@ -14,14 +14,14 @@ from util.io import load_referit_gt_mask as load_gt_mask
 # Parameters
 ################################################################################
 
-image_dir = './exp-referit/referit-dataset/images/'
-mask_dir = './exp-referit/referit-dataset/mask/'
-query_file = './exp-referit/data/referit_query_trainval.json'
-imsize_file = './exp-referit/data/referit_imsize.json'
-vocab_file = './exp-referit/data/vocabulary_referit.txt'
+image_dir = './referit/referit-dataset/images/'
+mask_dir = './referit/referit-dataset/mask/'
+query_file = './referit/data/referit_query_trainval.json'
+imsize_file = './referit/data/referit_imsize.json'
+vocab_file = './referit/data/vocabulary_referit.txt'
 
 # Saving directory
-data_folder = './exp-referit/data/train_batch_seg/'
+data_folder = './referit/data/train_batch_seg/'
 data_prefix = 'referit_train_seg'
 
 # Model Params
