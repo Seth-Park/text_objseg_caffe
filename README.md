@@ -42,7 +42,7 @@ Project Page: http://ronghanghu.com/text_objseg
 9. You may need to add the repository root directory to Python's module path:  
 `export PYTHONPATH=path/to/text_objseg_caffe:$PYTHONPATH`.
 10. Configure the `test_config.py` file in the directory `seg_model` and run evaluation for the high resolution language-based segmentation model:  
-`python referit/test_seg_model.py`.
+`python referit/test_seg_model.py`.  
 This should reproduce the results in the paper.
 11. You may also evaluate the language-based bounding box localization model:  
 `python referit/test_det_model.py`.  
