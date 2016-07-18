@@ -1,8 +1,6 @@
 # Model Params
 T = 20
 N = 50
-#input_H = 512
-#input_W = 512
 input_H = 224 
 input_W = 224 
 featmap_H = (input_H // 32)
@@ -17,7 +15,7 @@ gpu_id = 0
 max_iter = 25000
 
 weights = '/data3/seth/VGG_ILSVRC_16_layers.caffemodel'
-fix_vgg = True
+fix_vgg = True  # set False to finetune VGG net
 vgg_dropout = False
 mlp_dropout = False
 

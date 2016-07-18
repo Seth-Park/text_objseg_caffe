@@ -14,8 +14,8 @@ mlp_hidden_dims = 500
 gpu_id = 7
 max_iter = 25000
 
-weights = '/data2/seth/nl_seg_caffe/snapshots/low_res_seg/_iter_25000.caffemodel'
-fix_vgg = True
+weights = '/data2/seth/nl_seg_caffe/snapshots/low_res_seg/_iter_25000.caffemodel'  # set as None if training from scratch
+fix_vgg = True  # set as False if finetuning VGG net
 vgg_dropout = False
 mlp_dropout = False
 
