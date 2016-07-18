@@ -7,8 +7,7 @@ import skimage
 import skimage.io
 import skimage.transform
 
-from util import im_processing, text_processing, eval_tools
-from models import processing_tools
+from util import processing_tools, im_processing, text_processing, eval_tools
 
 ################################################################################
 # Parameters
