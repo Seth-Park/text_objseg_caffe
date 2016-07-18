@@ -26,7 +26,9 @@ Project Page: http://ronghanghu.com/text_objseg
 
 ### Training
 3. You may need to add the repository root directory to Python's module path:  
-`export PYTHONPATH=/path/to/text_objseg_caffe/:$PYTHONPATH`.
+```
+export PYTHONPATH=/path/to/text_objseg_caffe/:$PYTHONPATH
+```
 4. Build training batches for bounding boxes:  
 `python referit/build_training_batches_det.py`.
 5. Build training batches for segmentation:  
