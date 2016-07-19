@@ -21,7 +21,7 @@ def compute_accuracy(scores, labels):
 
 
 def train():
-    with open('./proto_train.prototxt', 'w') as f:
+    with open('./det_model/proto_train.prototxt', 'w') as f:
         f.write(str(det_model.generate_model('train', config.N)))
 
     #with open('./proto_test.prototxt', 'w') as f:
@@ -30,7 +30,7 @@ def train():
     caffe.set_device(config.gpu_id)
     caffe.set_mode_gpu()
 
-    solver = caffe.get_solver('./solver.prototxt')
+    solver = caffe.get_solver('./det_model/solver.prototxt')
     solver.net.copy_from(config.weights)
 
     cls_loss_avg = 0.0

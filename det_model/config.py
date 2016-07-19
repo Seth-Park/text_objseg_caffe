@@ -14,7 +14,7 @@ mlp_hidden_dims = 500
 gpu_id = 0
 max_iter = 25000
 
-weights = '/data3/seth/VGG_ILSVRC_16_layers.caffemodel'
+weights = '/x/dhpseth/VGG_ILSVRC_16_layers.caffemodel'
 fix_vgg = True  # set False to finetune VGG net
 vgg_dropout = False
 mlp_dropout = False
@@ -23,7 +23,7 @@ mlp_dropout = False
 data_provider = 'referit_data_provider'
 data_provider_layer = 'ReferitDataProviderLayer'
 
-data_folder = '/mnt/coelacanth/seth/data/exp-referit/data/train_batch_det/'
+data_folder = './referit/data/train_batch_det/'
 data_prefix = 'referit_train_det'
 
 

@@ -1,9 +1,9 @@
-train_net: "./proto_train.prototxt"
+train_net: "./seg_model/proto_train.prototxt"
 
 max_iter: 25000
 display: 500000 
 snapshot: 5000
-snapshot_prefix: "/data2/seth/nl_seg_caffe/snapshots/high_res_seg4/"
+snapshot_prefix: "/x/dhpseth/text_objseg_caffe/snapshots/high_res_seg/"
 
 solver_type: ADAM
 base_lr: 0.0001

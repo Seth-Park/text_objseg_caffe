@@ -167,6 +167,7 @@ def generate_model(split, batch_size):
     else:
         n.fcn_scores = conv(n.fcn_relu1, 1, ks=1, pad=0)
 
+    """
     n.upscores = L.Deconvolution(n.fcn_scores, 
                                  convolution_param=dict(num_output=1,
                                                         kernel_size=64,
@@ -174,6 +175,13 @@ def generate_model(split, batch_size):
                                                         pad=16,
                                                         bias_term=False,
                                                         weight_filler=dict(type='bilinear')))
+    """
+    n.upscores = L.Deconvolution(n.fcn_scores, 
+                                 convolution_param=dict(num_output=1,
+                                                        kernel_size=64,
+                                                        stride=32,
+                                                        pad=16,
+                                                        bias_term=False))
 
     # Loss Layer
     n.loss = L.SigmoidCrossEntropyLoss(n.upscores, n.label)

@@ -14,7 +14,7 @@ mlp_hidden_dims = 500
 gpu_id = 7
 max_iter = 25000
 
-weights = '/data2/seth/nl_seg_caffe/snapshots/low_res_seg/_iter_25000.caffemodel'  # set as None if training from scratch
+weights = '/x/dhpseth/text_objseg_caffe/snapshots/low_res_seg/_iter_25000.caffemodel'  # set as None if training from scratch
 fix_vgg = True  # set as False if finetuning VGG net
 vgg_dropout = False
 mlp_dropout = False
@@ -23,7 +23,7 @@ mlp_dropout = False
 data_provider = 'referit_data_provider'
 data_provider_layer = 'ReferitDataProviderLayer'
 
-data_folder = '/mnt/coelacanth/seth/data/exp-referit/data/train_batch_seg/'
+data_folder = './referit/data/train_batch_seg/'
 data_prefix = 'referit_train_seg'
 
 

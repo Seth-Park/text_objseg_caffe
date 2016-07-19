@@ -13,7 +13,7 @@ mlp_hidden_dims = 500
 
 # Testing Params
 gpu_id = 2 
-pretrained_model = '/data2/seth/nl_seg_caffe/snapshots/high_res_seg/_iter_25000.caffemodel'
+pretrained_model = '/x/dhpseth/text_objseg_caffe/snapshots/high_res_seg/_iter_25000.caffemodel'
 
 score_thresh = 1e-9
 

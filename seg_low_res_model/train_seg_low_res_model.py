@@ -9,13 +9,13 @@ import config
 
 
 def train():
-    with open('./proto_train.prototxt', 'w') as f:
+    with open('./seg_low_res_model/proto_train.prototxt', 'w') as f:
         f.write(str(segmodel.generate_model('train', config.N)))
 
     caffe.set_device(config.gpu_id)
     caffe.set_mode_gpu()
 
-    solver = caffe.get_solver('./solver.prototxt')
+    solver = caffe.get_solver('./seg_low_res_model/solver.prototxt')
     if config.weights is not None:
         solver.net.copy_from(config.weights)
 

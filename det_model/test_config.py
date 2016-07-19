@@ -16,7 +16,7 @@ D_text = lstm_dim
 
 # Testing Params
 gpu_id = 0
-pretrained_model = '/data2/seth/nl_seg_caffe/snapshots/det/_iter_25000.caffemodel'
+pretrained_model = '/x/dhpseth/text_objseg_caffe/snapshots/det/_iter_25000.caffemodel'
 
 correct_iou_thresh = 0.5
 use_nms = False

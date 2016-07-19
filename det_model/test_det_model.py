@@ -18,20 +18,20 @@ from util import processing_tools, im_processing, text_processing, eval_tools
 ################################################################################
 
 def inference():
-    with open('./fc8.prototxt', 'w') as f:
+    with open('./det_model/fc8.prototxt', 'w') as f:
         f.write(str(det_model.generate_fc8('val', test_config.N)))
-    with open('./scores.prototxt', 'w') as f:
+    with open('./det_model/scores.prototxt', 'w') as f:
         f.write(str(det_model.generate_scores('val', test_config.N)))
 
     caffe.set_device(test_config.gpu_id)
     caffe.set_mode_gpu()
 
     # Load pretrained model
-    fc8_net = caffe.Net('./fc8.prototxt',
+    fc8_net = caffe.Net('./det_model/fc8.prototxt',
                         test_config.pretrained_model,
                         caffe.TEST)
 
-    scores_net = caffe.Net('./scores.prototxt',
+    scores_net = caffe.Net('./det_model/scores.prototxt',
                            test_config.pretrained_model,
                            caffe.TEST)
 
