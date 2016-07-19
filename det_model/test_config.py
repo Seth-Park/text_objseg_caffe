@@ -27,12 +27,12 @@ nms_thresh = 0.3
 data_provider = 'referit_data_provider'
 data_provider_layer = 'ReferitDataProviderLayer'
 
-image_dir = '../referit/referit-dataset/images/'
-bbox_proposal_dir = '../referit/data/referit_edgeboxes_top100/'
-query_file = '../referit/data/referit_query_test.json'
-bbox_file = '../referit/data/referit_bbox.json'
-imcrop_file = '../referit/data/referit_imcrop.json'
-imsize_file = '../referit/data/referit_imsize.json'
-vocab_file = '../referit/data/vocabulary_referit.txt'
+image_dir = './referit/referit-dataset/images/'
+bbox_proposal_dir = './referit/data/referit_edgeboxes_top100/'
+query_file = './referit/data/referit_query_test.json'
+bbox_file = './referit/data/referit_bbox.json'
+imcrop_file = './referit/data/referit_imcrop.json'
+imsize_file = './referit/data/referit_imsize.json'
+vocab_file = './referit/data/vocabulary_referit.txt'
 
 
