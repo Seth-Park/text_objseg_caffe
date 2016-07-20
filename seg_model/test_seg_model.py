@@ -18,28 +18,28 @@ from util.io import load_referit_gt_mask as load_gt_mask
 # Evaluation network
 ################################################################################
 
-def inference():
+def inference(config):
     with open('./seg_model/test.prototxt', 'w') as f:
-        f.write(str(seg_model.generate_model('val', test_config.N)))
+        f.write(str(seg_model.generate_model('val', config)))
 
-    caffe.set_device(test_config.gpu_id)
+    caffe.set_device(config.gpu_id)
     caffe.set_mode_gpu()
 
     # Load pretrained model
     net = caffe.Net('./seg_model/test.prototxt',
-                    test_config.pretrained_model,
+                    config.pretrained_model,
                     caffe.TEST)
 
     ################################################################################
     # Load annotations and bounding box proposals
     ################################################################################
 
-    query_dict = json.load(open(test_config.query_file))
-    bbox_dict = json.load(open(test_config.bbox_file))
-    imcrop_dict = json.load(open(test_config.imcrop_file))
-    imsize_dict = json.load(open(test_config.imsize_file))
+    query_dict = json.load(open(config.query_file))
+    bbox_dict = json.load(open(config.bbox_file))
+    imcrop_dict = json.load(open(config.imcrop_file))
+    imsize_dict = json.load(open(config.imsize_file))
     imlist = list({name.split('_', 1)[0] + '.jpg' for name in query_dict})
-    vocab_dict = text_processing.load_vocab_dict_from_file(test_config.vocab_file)
+    vocab_dict = text_processing.load_vocab_dict_from_file(config.vocab_file)
 
     ################################################################################
     # Flatten the annotations
@@ -66,17 +66,17 @@ def inference():
     seg_total = 0.0
 
     # Pre-allocate arrays
-    imcrop_val = np.zeros((test_config.N, test_config.input_H, test_config.input_W, 3), dtype=np.float32)
-    text_seq_val = np.zeros((test_config.T, test_config.N), dtype=np.int32)
+    imcrop_val = np.zeros((config.N, config.input_H, config.input_W, 3), dtype=np.float32)
+    text_seq_val = np.zeros((config.T, config.N), dtype=np.int32)
 
     num_im = len(imlist)
     for n_im in tqdm(range(num_im)):
         imname = imlist[n_im]
 
         # Extract visual features from all proposals
-        im = skimage.io.imread(test_config.image_dir + imname)
+        im = skimage.io.imread(config.image_dir + imname)
         processed_im = skimage.img_as_ubyte(
-            im_processing.resize_and_pad(im, test_config.input_H, test_config.input_W))
+            im_processing.resize_and_pad(im, config.input_H, config.input_W))
                                                                          
         if processed_im.ndim == 2:
             processed_im = np.tile(processed_im[:, :, np.newaxis], (1, 1, 3))
@@ -85,18 +85,18 @@ def inference():
         imcrop_val_trans = imcrop_val.transpose((0, 3, 1, 2))
 
         # Extract spatial features
-        spatial_val = processing_tools.generate_spatial_batch(test_config.N,
-                                                              test_config.featmap_H,
-                                                              test_config.featmap_W)
+        spatial_val = processing_tools.generate_spatial_batch(config.N,
+                                                              config.featmap_H,
+                                                              config.featmap_W)
         spatial_val = spatial_val.transpose((0, 3, 1, 2))
 
         for imcrop_name, _, description in flat_query_dict[imname]:
-            mask = load_gt_mask(test_config.mask_dir + imcrop_name + '.mat').astype(np.float32)
+            mask = load_gt_mask(config.mask_dir + imcrop_name + '.mat').astype(np.float32)
             labels = (mask > 0)
-            processed_labels = im_processing.resize_and_pad(mask, test_config.input_H, test_config.input_W)
+            processed_labels = im_processing.resize_and_pad(mask, config.input_H, config.input_W)
             processed_labels = processed_labels > 0
 
-            text_seq_val[:, 0] = text_processing.preprocess_sentence(description, vocab_dict, test_config.T)
+            text_seq_val[:, 0] = text_processing.preprocess_sentence(description, vocab_dict, config.T)
             cont_val = text_processing.create_cont(text_seq_val)
 
             net.blobs['language'].data[...] = text_seq_val
@@ -110,7 +110,7 @@ def inference():
             upscores = np.squeeze(upscores)
 
             # Evaluate the segmentation performance of using bounding box segmentation
-            pred_raw = (upscores >= test_config.score_thresh).astype(np.float32)
+            pred_raw = (upscores >= config.score_thresh).astype(np.float32)
             predicts = im_processing.resize_and_crop(pred_raw, im.shape[0], im.shape[1])
             I, U = eval_tools.compute_mask_IU(predicts, labels)
             cum_I += I
@@ -132,4 +132,5 @@ def inference():
     print(result_str)
 
 if __name__ == '__main__':
-    inference()
+    config = test_config.Config()
+    inference(config)

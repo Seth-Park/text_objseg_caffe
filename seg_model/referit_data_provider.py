@@ -5,11 +5,11 @@ import threading
 import Queue as queue
 import ast
 
-import config
-import test_config
+import train_config
 import seg_model as segmodel
 from util.processing_tools import *
 
+config = train_config.Config()
 
 def create_cont(text_seq_batch):
     cont_batch = np.zeros_like(text_seq_batch)

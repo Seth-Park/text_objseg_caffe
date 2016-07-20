@@ -5,8 +5,6 @@ import caffe
 from caffe import layers as L
 from caffe import params as P
 
-import config
-import test_config
 
 channel_mean = np.array([123.68, 116.779, 103.939], dtype=np.float32)
 
@@ -60,8 +58,9 @@ def max_pool(bottom, ks=2, stride=2):
 # Model Generation
 ###############################################################################
 
-def generate_model(split, batch_size):
+def generate_model(split, config):
     n = caffe.NetSpec()
+    batch_size = config.N
     mode_str = str(dict(split=split, batch_size=batch_size))
     n.language, n.cont, n.image, n.spatial, n.label = L.Python(module=config.data_provider,
                                                                layer=config.data_provider_layer,
