@@ -6,6 +6,7 @@ import json
 import skimage
 import skimage.io
 import skimage.transform
+import caffe
 
 from util import processing_tools, im_processing, text_processing, eval_tools
 
@@ -22,7 +23,7 @@ imsize_file = './referit/data/referit_imsize.json'
 vocab_file = './referit/data/vocabulary_referit.txt'
 
 # Saving directory
-data_folder = './referit/data/train_batch_det/'
+data_folder = './referit/data/train_batch_det_resnet/'
 data_prefix = 'referit_train_det'
 
 # Sample selection params
@@ -31,7 +32,7 @@ neg_iou = 1e-6
 neg_to_pos_ratio = 1.0
 
 # Model Param
-N = 50
+N = 25 
 T = 20
 
 ################################################################################
@@ -121,8 +122,28 @@ print('total batch number: %d' % num_batch)
 
 text_seq_batch = np.zeros((T, N), dtype=np.int32)
 imcrop_batch = np.zeros((N, 224, 224, 3), dtype=np.uint8)
+feature_batch = np.zeros((N, 2048, 7, 7), dtype=np.float32)
 spatial_batch = np.zeros((N, 8), dtype=np.float32)
 label_batch = np.zeros((N, 1), dtype=np.bool)
+
+# Initialize ResNet-152
+gpu_id = 7 
+resnet_prototxt_path = '/home/dhpseth/vqa/00_data_preprocess/ResNet-152-deploy.prototxt'
+resnet_mean_path = '/home/dhpseth/vqa/00_data_preprocess/ResNet_mean.binaryproto'
+resnet_caffemodel_path = '/data3/seth/ResNet-152-model.caffemodel'
+extract_layer = 'res5c'
+extract_layer_size = (2048, 7, 7)
+
+caffe.set_device(gpu_id)
+caffe.set_mode_gpu()
+
+resnet = caffe.Net(resnet_prototxt_path, resnet_caffemodel_path, caffe.TEST)
+
+# mean subtraction
+blob = caffe.proto.caffe_pb2.BlobProto()
+data = open(resnet_mean_path, 'rb').read()
+blob.ParseFromString(data)
+resnet_mean = np.array(caffe.io.blobproto_to_array(blob)).astype(np.float32).reshape(3, 224, 224)
 
 if not os.path.isdir(data_folder):
     os.mkdir(data_folder)
@@ -137,17 +158,29 @@ for n_batch in range(num_batch):
 
         imcrop = im[ymin:ymax+1, xmin:xmax+1, :]
         imcrop = skimage.img_as_ubyte(skimage.transform.resize(imcrop, [224, 224]))
+
+        # ResNet feature extraction
+        im_preprocessed = imcrop.astype(np.float32).transpose((2, 0, 1)) - resnet_mean
+        resnet.blobs['data'].data[0,...] = im_preprocessed
+        resnet.forward()
+        feature = resnet.blobs[extract_layer].data[0].copy()
+        feature = feature.reshape(extract_layer_size)
+
         spatial_feat = processing_tools.spatial_feature_from_bbox(sample_bbox, imsize)
         text_seq = text_processing.preprocess_sentence(description, vocab_dict, T)
 
         idx = n_sample - batch_begin
         text_seq_batch[:, idx] = text_seq
         imcrop_batch[idx, ...] = imcrop
+        feature_batch[idx, ...] = feature
         spatial_batch[idx, ...] = spatial_feat
         label_batch[idx] = label
 
+    cont_batch = text_processing.create_cont(text_seq_batch)
     np.savez(file=data_folder + data_prefix + '_' + str(n_batch) + '.npz',
         text_seq_batch=text_seq_batch,
+        cont_batch=cont_batch,
         imcrop_batch=imcrop_batch,
+        feature_batch=feature_batch,
         spatial_batch=spatial_batch,
         label_batch=label_batch)
