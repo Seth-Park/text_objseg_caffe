@@ -67,3 +67,6 @@ You may also evaluate the language-based bounding box localization model:
 python det_model/test_det_model.py
 ```  
 The results can be compared to [this paper](http://ronghanghu.com/text_obj_retrieval/).
+
+## Demo
+There is a demo that you can try! Run the demo in `./demo/text_objseg_demo.ipynb` with [Jupyter Notebook (IPython Notebook)](http://ipython.org/notebook.html).
