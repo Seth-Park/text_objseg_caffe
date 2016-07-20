@@ -5,12 +5,12 @@ import sys
 
 import seg_low_res_model as segmodel
 from util.processing_tools import *
-import config
+import train_config
 
 
-def train():
+def train(config):
     with open('./seg_low_res_model/proto_train.prototxt', 'w') as f:
-        f.write(str(segmodel.generate_model('train', config.N)))
+        f.write(str(segmodel.generate_model('train', config)))
 
     caffe.set_device(config.gpu_id)
     caffe.set_mode_gpu()
@@ -45,4 +45,5 @@ def train():
               % (it, avg_accuracy_all, avg_accuracy_pos, avg_accuracy_neg))
 
 if __name__ == '__main__':
-    train()
+    config = train_config.Config()
+    train(config)

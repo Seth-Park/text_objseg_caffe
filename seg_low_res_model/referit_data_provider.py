@@ -5,10 +5,11 @@ import threading
 import Queue as queue
 import ast
 
-import config
-import test_config
+import train_config
 import seg_low_res_model as segmodel
 from util.processing_tools import *
+
+config = train_config.Config()
 
 
 def create_cont(text_seq_batch):
@@ -144,24 +145,4 @@ class ReferitDataProviderLayer(caffe.Layer):
     def backward(self, top, propagate_down, bottom):
         pass
 
-
-class TossLayer(caffe.Layer):
-    def setup(self, bottom, top):
-        params = ast.literal_eval(self.param_str)
-        self.batch_size = params['batch_size']
-        self.split = params['split']
-        top[0].reshape(config.T, self.batch_size)
-        top[1].reshape(config.T, self.batch_size)
-        top[2].reshape(self.batch_size, 3, config.input_H, config.input_W)
-        top[3].reshape(self.batch_size, 8, config.featmap_H, config.featmap_W)
-        top[4].reshape(self.batch_size, 1, config.featmap_H, config.featmap_W)
-
-    def reshape(self, bottom, top):
-        pass
-
-    def forward(self, bottom, top):
-        pass
-
-    def backward(self, top, propagate_down, bottom):
-        pass
 
