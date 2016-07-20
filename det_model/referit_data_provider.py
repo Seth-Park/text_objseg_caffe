@@ -5,9 +5,12 @@ import threading
 import Queue as queue
 import ast
 
-import config
+import train_config
 import test_config
 import det_model
+
+config = train_config.Config()
+test_config = test_config.Config()
 
 
 def create_cont(text_seq_batch):

@@ -4,7 +4,7 @@ import os
 import sys
 
 import det_model
-import config
+import train_config
 
 def compute_accuracy(scores, labels):
     is_pos = (labels != 0)
@@ -20,12 +20,9 @@ def compute_accuracy(scores, labels):
     return accuracy_all, accuracy_pos, accuracy_neg
 
 
-def train():
+def train(config):
     with open('./det_model/proto_train.prototxt', 'w') as f:
-        f.write(str(det_model.generate_model('train', config.N)))
-
-    #with open('./proto_test.prototxt', 'w') as f:
-    #    f.write(str(det_model.generate_model('val', config.N)))
+        f.write(str(det_model.generate_model('train', config)))
 
     caffe.set_device(config.gpu_id)
     caffe.set_mode_gpu()
@@ -61,4 +58,5 @@ def train():
               % (it, avg_accuracy_all, avg_accuracy_pos, avg_accuracy_neg))
 
 if __name__ == '__main__':
-    train()
+    config = train_config.Config()
+    train(config)

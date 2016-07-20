@@ -5,9 +5,6 @@ import caffe
 from caffe import layers as L
 from caffe import params as P
 
-import config
-import test_config
-
 channel_mean = np.array([123.68, 116.779, 103.939], dtype=np.float32)
 
 ###############################################################################
@@ -92,8 +89,9 @@ def max_pool(bottom, ks=2, stride=2):
 # Model Generation
 ###############################################################################
 
-def generate_model(split, batch_size):
+def generate_model(split, config):
     n = caffe.NetSpec()
+    batch_size = config.N
     mode_str = str(dict(split=split, batch_size=batch_size))
     n.language, n.cont, n.image, n.spatial, n.label = L.Python(module=config.data_provider,
                                                                layer=config.data_provider_layer,
@@ -212,9 +210,10 @@ def generate_model(split, batch_size):
 
     return n.to_proto()
 
-def generate_fc8(split, batch_size):
+def generate_fc8(split, config):
 
     n = caffe.NetSpec()
+    batch_size = config.N
     mode_str = str(dict(split=split, batch_size=batch_size))
     n.language, n.cont, n.image, n.spatial, n.label = L.Python(module=config.data_provider,
                                                                layer=config.data_provider_layer,
@@ -293,9 +292,10 @@ def generate_fc8(split, batch_size):
                    finetune=(not config.fix_vgg))
     return n.to_proto()
 
-def generate_scores(split, batch_size):
+def generate_scores(split, config):
 
     n = caffe.NetSpec()
+    batch_size = config.N
     mode_str = str(dict(split=split, batch_size=batch_size))
     n.language, n.cont, n.img_feature, n.spatial, n.label = L.Python(module=config.data_provider,
                                                                      layer='TossLayer',
@@ -322,9 +322,9 @@ def generate_scores(split, batch_size):
     n.img_l2norm = L.L2Normalize(n.img_feature)
     n.lstm_l2norm = L.L2Normalize(n.lstm_feat)
     n.img_l2norm_resh = L.Reshape(n.img_l2norm,
-                                  reshape_param=dict(shape=dict(dim=[-1, test_config.D_im])))
+                                  reshape_param=dict(shape=dict(dim=[-1, config.D_im])))
     n.lstm_l2norm_resh = L.Reshape(n.lstm_l2norm,
-                                  reshape_param=dict(shape=dict(dim=[-1, test_config.D_text])))
+                                  reshape_param=dict(shape=dict(dim=[-1, config.D_text])))
 
     # Concatenate
     n.feat_all = L.Concat(n.lstm_l2norm_resh, n.img_l2norm_resh, n.spatial, concat_param=dict(axis=1))

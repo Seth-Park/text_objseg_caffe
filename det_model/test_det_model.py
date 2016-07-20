@@ -17,39 +17,39 @@ from util import processing_tools, im_processing, text_processing, eval_tools
 # Evaluation network
 ################################################################################
 
-def inference():
+def inference(config):
     with open('./det_model/fc8.prototxt', 'w') as f:
-        f.write(str(det_model.generate_fc8('val', test_config.N)))
+        f.write(str(det_model.generate_fc8('val', config)))
     with open('./det_model/scores.prototxt', 'w') as f:
-        f.write(str(det_model.generate_scores('val', test_config.N)))
+        f.write(str(det_model.generate_scores('val', config)))
 
-    caffe.set_device(test_config.gpu_id)
+    caffe.set_device(config.gpu_id)
     caffe.set_mode_gpu()
 
     # Load pretrained model
     fc8_net = caffe.Net('./det_model/fc8.prototxt',
-                        test_config.pretrained_model,
+                        config.pretrained_model,
                         caffe.TEST)
 
     scores_net = caffe.Net('./det_model/scores.prototxt',
-                           test_config.pretrained_model,
+                           config.pretrained_model,
                            caffe.TEST)
 
     ################################################################################
     # Load annotations and bounding box proposals
     ################################################################################
 
-    query_dict = json.load(open(test_config.query_file))
-    bbox_dict = json.load(open(test_config.bbox_file))
-    imcrop_dict = json.load(open(test_config.imcrop_file))
-    imsize_dict = json.load(open(test_config.imsize_file))
+    query_dict = json.load(open(config.query_file))
+    bbox_dict = json.load(open(config.bbox_file))
+    imcrop_dict = json.load(open(config.imcrop_file))
+    imsize_dict = json.load(open(config.imsize_file))
     imlist = list({name.split('_', 1)[0] + '.jpg' for name in query_dict})
-    vocab_dict = text_processing.load_vocab_dict_from_file(test_config.vocab_file)
+    vocab_dict = text_processing.load_vocab_dict_from_file(config.vocab_file)
 
     # Object proposals
     bbox_proposal_dict = {}
     for imname in imlist:
-        bboxes = np.loadtxt(test_config.bbox_proposal_dir + imname[:-4] + '.txt').astype(int).reshape((-1, 4))
+        bboxes = np.loadtxt(config.bbox_proposal_dir + imname[:-4] + '.txt').astype(int).reshape((-1, 4))
         bbox_proposal_dict[imname] = bboxes
 
     ################################################################################
@@ -76,13 +76,13 @@ def inference():
     bbox_total = 0
 
     # Pre-allocate arrays
-    imcrop_val = np.zeros((test_config.N, test_config.input_H, test_config.input_W, 3), dtype=np.float32)
-    spatial_val = np.zeros((test_config.N, 8), dtype=np.float32)
-    text_seq_val = np.zeros((test_config.T, test_config.N), dtype=np.int32)
+    imcrop_val = np.zeros((config.N, config.input_H, config.input_W, 3), dtype=np.float32)
+    spatial_val = np.zeros((config.N, 8), dtype=np.float32)
+    text_seq_val = np.zeros((config.T, config.N), dtype=np.int32)
 
-    dummy_text_seq = np.zeros((test_config.T, test_config.N), dtype=np.int32)
-    dummy_cont = np.zeros((test_config.T, test_config.N), dtype=np.int32)
-    dummy_label = np.zeros((test_config.N, 1))
+    dummy_text_seq = np.zeros((config.T, config.N), dtype=np.int32)
+    dummy_cont = np.zeros((config.T, config.N), dtype=np.int32)
+    dummy_label = np.zeros((config.N, 1))
 
     num_im = len(imlist)
     for n_im in tqdm(range(num_im)):
@@ -90,14 +90,14 @@ def inference():
         imsize = imsize_dict[imname]
         bbox_proposals = bbox_proposal_dict[imname]
         num_proposal = bbox_proposals.shape[0]
-        assert(test_config.N >= num_proposal)
+        assert(config.N >= num_proposal)
 
         # Extract visual features from all proposals
-        im = skimage.io.imread(test_config.image_dir + imname)
+        im = skimage.io.imread(config.image_dir + imname)
         if im.ndim == 2:
             im = np.tile(im[:, :, np.newaxis], (1, 1, 3))
         imcrop_val[:num_proposal, ...] = im_processing.crop_bboxes_subtract_mean(
-            im, bbox_proposals, test_config.input_H, det_model.channel_mean)
+            im, bbox_proposals, config.input_H, det_model.channel_mean)
         imcrop_val_trans = imcrop_val.transpose((0, 3, 1, 2))
 
         # Extract bounding box features from proposals
@@ -118,7 +118,7 @@ def inference():
             proposal_IoUs = eval_tools.compute_bbox_iou(bbox_proposals, gt_bbox)
 
             # Extract language feature
-            text = text_processing.preprocess_sentence(description, vocab_dict, test_config.T)
+            text = text_processing.preprocess_sentence(description, vocab_dict, config.T)
             text_seq_val[...] = np.array(text, dtype=np.int32).reshape((-1, 1))
 
             cont_val = text_processing.create_cont(text_seq_val)
@@ -135,8 +135,8 @@ def inference():
             scores_val = scores_val[:num_proposal, ...].reshape(-1)
 
             # Sort the scores for the proposals
-            if test_config.use_nms:
-                top_ids = eval_tools.nms(proposal.astype(np.float32), scores_val, test_config.nms_thresh)
+            if config.use_nms:
+                top_ids = eval_tools.nms(proposal.astype(np.float32), scores_val, config.nms_thresh)
             else:
                 top_ids = np.argsort(scores_val)[::-1]
 
@@ -144,7 +144,7 @@ def inference():
             for n_eval_num in range(len(eval_bbox_num_list)):
                 eval_bbox_num = eval_bbox_num_list[n_eval_num]
                 bbox_correct[n_eval_num] += \
-                    np.any(proposal_IoUs[top_ids[:eval_bbox_num]] >= test_config.correct_iou_thresh)
+                    np.any(proposal_IoUs[top_ids[:eval_bbox_num]] >= config.correct_iou_thresh)
             bbox_total += 1
 
     print('Final results on the whole test set')
@@ -155,4 +155,5 @@ def inference():
     print(result_str)
 
 if __name__ == '__main__':
-    inference()
+    config = test_config.Config()
+    inference(config)
