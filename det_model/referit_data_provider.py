@@ -110,7 +110,7 @@ class ReferitDataProviderLayer(caffe.Layer):
         self.split = params['split']
         top[0].reshape(config.T, self.batch_size)
         top[1].reshape(config.T, self.batch_size)
-        top[2].reshape(self.batch_size, 2048, 7, 7)
+        top[2].reshape(self.batch_size, 2048, config.featmap_H, config.featmap_W)
         top[3].reshape(self.batch_size, 8)
         top[4].reshape(self.batch_size, 1)
 
