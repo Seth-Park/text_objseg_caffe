@@ -1,9 +1,9 @@
 train_net: "./det_model/proto_train.prototxt"
 
-max_iter: 30000
+max_iter: 50000
 display: 500000 
 snapshot: 5000
-snapshot_prefix: "/x/dhpseth/text_objseg_caffe/snapshots/det/"
+snapshot_prefix: "/mnt/coelacanth/seth/text_objseg_caffe/snapshots/res_det/"
 
 solver_type: ADAM
 base_lr: 0.001

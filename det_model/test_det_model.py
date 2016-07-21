@@ -18,22 +18,29 @@ from util import processing_tools, im_processing, text_processing, eval_tools
 ################################################################################
 
 def inference(config):
-    with open('./det_model/fc8.prototxt', 'w') as f:
-        f.write(str(det_model.generate_fc8('val', config)))
-    with open('./det_model/scores.prototxt', 'w') as f:
-        f.write(str(det_model.generate_scores('val', config)))
+    with open('./det_model/test.prototxt', 'w') as f:
+        f.write(str(det_model.generate_model('val', config)))
 
     caffe.set_device(config.gpu_id)
     caffe.set_mode_gpu()
 
     # Load pretrained model
-    fc8_net = caffe.Net('./det_model/fc8.prototxt',
-                        config.pretrained_model,
-                        caffe.TEST)
+    net = caffe.Net('./det_model/text.prototxt',
+                    config.pretrained_model,
+                    caffe.TEST)
 
-    scores_net = caffe.Net('./det_model/scores.prototxt',
-                           config.pretrained_model,
-                           caffe.TEST)
+    # Load ResNet
+    resnet = caffe.Net(config.resnet_prototxt,
+                       config.resnet_caffemodel,
+                       caffe.TEST)
+
+    # ResNet mean
+    blob = caffe.proto.caffe_pb2.BlobProto()
+    data = open(config.resnet_mean_path, 'rb').read()
+    blob.ParseFromString(data)
+    resnet_mean = np.array(caffe.io.blobproto_to_array(blob)).astype(np.float32).reshape(3, 224, 224)
+    resnet_mean = resnet_mean.transpose((1,2,0))
+
 
     ################################################################################
     # Load annotations and bounding box proposals
@@ -79,9 +86,6 @@ def inference(config):
     imcrop_val = np.zeros((config.N, config.input_H, config.input_W, 3), dtype=np.float32)
     spatial_val = np.zeros((config.N, 8), dtype=np.float32)
     text_seq_val = np.zeros((config.T, config.N), dtype=np.int32)
-
-    dummy_text_seq = np.zeros((config.T, config.N), dtype=np.int32)
-    dummy_cont = np.zeros((config.T, config.N), dtype=np.int32)
     dummy_label = np.zeros((config.N, 1))
 
     num_im = len(imlist)
@@ -97,21 +101,16 @@ def inference(config):
         if im.ndim == 2:
             im = np.tile(im[:, :, np.newaxis], (1, 1, 3))
         imcrop_val[:num_proposal, ...] = im_processing.crop_bboxes_subtract_mean(
-            im, bbox_proposals, config.input_H, det_model.channel_mean)
+            im, bbox_proposals, config.input_H, resnet_mean)
         imcrop_val_trans = imcrop_val.transpose((0, 3, 1, 2))
 
         # Extract bounding box features from proposals
         spatial_val[:num_proposal, ...] = \
             processing_tools.spatial_feature_from_bbox(bbox_proposals, imsize)
 
-        fc8_net.blobs['language'].data[...] = dummy_text_seq
-        fc8_net.blobs['cont'].data[...] = dummy_cont
-        fc8_net.blobs['image'].data[...] = imcrop_val_trans
-        fc8_net.blobs['spatial'].data[...] = spatial_val
-        fc8_net.blobs['label'].data[...] = dummy_label
-
-        fc8_net.forward()
-        fc8_val = fc8_net.blobs['fc8'].data[...].copy()
+        resnet.blobs['data'].data[...] = imcrop_val_trans
+        resnet.forward()
+        feature = resnet.blobs['res5c'].data[...].copy()
 
         # Extract textual features from sentences
         for imcrop_name, gt_bbox, description in flat_query_dict[imname]:
@@ -123,15 +122,15 @@ def inference(config):
 
             cont_val = text_processing.create_cont(text_seq_val)
 
-            scores_net.blobs['language'].data[...] = text_seq_val
-            scores_net.blobs['cont'].data[...] = cont_val
-            scores_net.blobs['img_feature'].data[...] = fc8_val
-            scores_net.blobs['spatial'].data[...] = spatial_val
-            scores_net.blobs['label'].data[...] = dummy_label
+            net.blobs['language'].data[...] = text_seq_val
+            net.blobs['cont'].data[...] = cont_val
+            net.blobs['image'].data[...] = feature
+            net.blobs['spatial'].data[...] = spatial_val
+            net.blobs['label'].data[...] = dummy_label
 
-            scores_net.forward()
+            net.forward()
 
-            scores_val = scores_net.blobs['scores'].data.copy()
+            scores_val = net.blobs['scores'].data.copy()
             scores_val = scores_val[:num_proposal, ...].reshape(-1)
 
             # Sort the scores for the proposals

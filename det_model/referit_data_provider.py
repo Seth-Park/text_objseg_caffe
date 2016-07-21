@@ -45,9 +45,8 @@ def run_prefetch(prefetch_queue, folder_name, prefix, num_batch, shuffle):
         
         # process the batch
         text_seq_val = batch['text_seq_batch']
-        cont_val = create_cont(text_seq_val)
-        imcrop_val = batch['imcrop_batch'].astype(np.float32) - det_model.channel_mean
-        imcrop_val = imcrop_val.transpose((0, 3, 1, 2))
+        cont_val = batch['cont_batch']
+        imcrop_val = batch['imcrop_batch'].astype(np.float32)
         spatial_batch_val = batch['spatial_batch']
         label_val = batch['label_batch'].astype(np.float32)
         data = { 'text_seq_batch': text_seq_val,
@@ -111,7 +110,7 @@ class ReferitDataProviderLayer(caffe.Layer):
         self.split = params['split']
         top[0].reshape(config.T, self.batch_size)
         top[1].reshape(config.T, self.batch_size)
-        top[2].reshape(self.batch_size, 3, config.input_H, config.input_W)
+        top[2].reshape(self.batch_size, 2048, 7, 7)
         top[3].reshape(self.batch_size, 8)
         top[4].reshape(self.batch_size, 1)
 
@@ -143,24 +142,4 @@ class ReferitDataProviderLayer(caffe.Layer):
     def backward(self, top, propagate_down, bottom):
         pass
 
-
-class TossLayer(caffe.Layer):
-    def setup(self, bottom, top):
-        params = ast.literal_eval(self.param_str)
-        self.batch_size = params['batch_size']
-        self.split = params['split']
-        top[0].reshape(test_config.T, self.batch_size)
-        top[1].reshape(test_config.T, self.batch_size)
-        top[2].reshape(self.batch_size, test_config.D_im)
-        top[3].reshape(self.batch_size, 8)
-        top[4].reshape(self.batch_size, 1)
-
-    def reshape(self, bottom, top):
-        pass
-
-    def forward(self, bottom, top):
-        pass
-
-    def backward(self, top, propagate_down, bottom):
-        pass
 

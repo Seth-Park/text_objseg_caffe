@@ -11,17 +11,15 @@ class Config():
         self.embed_dim = 1000
         self.lstm_dim = 1000
         self.mlp_hidden_dims = 500
-        self.fix_vgg = True
-        self.vgg_dropout = False
         self.mlp_dropout = False
-
-        self.D_im = 1000
-        self.D_text = self.lstm_dim
-
 
         # Testing Params
         self.gpu_id = 1
         self.pretrained_model = '/x/dhpseth/text_objseg_caffe/snapshots/det/_iter_25000.caffemodel'
+
+        self.resnet_prototxt = '/home/dhpseth/vqa/00_data_preprocess/ResNet-152-deploy.prototxt'
+        self.resnet_mean_path = '/home/dhpseth/vqa/00_data_preprocess/ResNet_mean.binaryproto'
+        self.resnet_caffemodel = '/data3/seth/ResNet-152-model.caffemodel'
 
         self.correct_iou_thresh = 0.5
         self.use_nms = False
