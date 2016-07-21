@@ -28,7 +28,6 @@ def train(config):
     caffe.set_mode_gpu()
 
     solver = caffe.get_solver('./det_model/solver.prototxt')
-    solver.net.copy_from(config.weights)
 
     cls_loss_avg = 0.0
     avg_accuracy_all, avg_accuracy_pos, avg_accuracy_neg = 0, 0, 0
