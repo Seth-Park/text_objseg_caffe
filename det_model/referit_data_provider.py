@@ -46,7 +46,7 @@ def run_prefetch(prefetch_queue, folder_name, prefix, num_batch, shuffle):
         # process the batch
         text_seq_val = batch['text_seq_batch']
         cont_val = batch['cont_batch']
-        imcrop_val = batch['imcrop_batch'].astype(np.float32)
+        imcrop_val = batch['feature_batch'].astype(np.float32)
         spatial_batch_val = batch['spatial_batch']
         label_val = batch['label_batch'].astype(np.float32)
         data = { 'text_seq_batch': text_seq_val,

@@ -6,8 +6,6 @@ from caffe import layers as L
 from caffe import params as P
 
 
-channel_mean = np.array([123.68, 116.779, 103.939], dtype=np.float32)
-
 ###############################################################################
 # Helper Methods
 ###############################################################################
@@ -67,59 +65,10 @@ def generate_model(split, config):
                                                                param_str=mode_str,
                                                                ntop=5)
 
-    # the base net (VGG-16)
-    n.conv1_1, n.relu1_1 = conv_relu(n.image, 64,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.conv1_2, n.relu1_2 = conv_relu(n.relu1_1, 64,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.pool1 = max_pool(n.relu1_2)
-
-    n.conv2_1, n.relu2_1 = conv_relu(n.pool1, 128,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.conv2_2, n.relu2_2 = conv_relu(n.relu2_1, 128,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.pool2 = max_pool(n.relu2_2)
-
-    n.conv3_1, n.relu3_1 = conv_relu(n.pool2, 256,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.conv3_2, n.relu3_2 = conv_relu(n.relu3_1, 256,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.conv3_3, n.relu3_3 = conv_relu(n.relu3_2, 256,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.pool3 = max_pool(n.relu3_3)
-
-    n.conv4_1, n.relu4_1 = conv_relu(n.pool3, 512,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.conv4_2, n.relu4_2 = conv_relu(n.relu4_1, 512,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.conv4_3, n.relu4_3 = conv_relu(n.relu4_2, 512,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.pool4 = max_pool(n.relu4_3)
-
-    n.conv5_1, n.relu5_1 = conv_relu(n.pool4, 512,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.conv5_2, n.relu5_2 = conv_relu(n.relu5_1, 512,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.conv5_3, n.relu5_3 = conv_relu(n.relu5_2, 512,
-                                     fix_param=config.fix_vgg,
-                                     finetune=(not config.fix_vgg))
-    n.pool5 = max_pool(n.relu5_3)
 
     # fully conv
-    n.fcn_fc6, n.fcn_relu6 = conv_relu(n.pool5, 4096, ks=7, pad=3)
-    if config.vgg_dropout:
+    n.fcn_fc6, n.fcn_relu6 = conv_relu(n.image, 4096, ks=7, pad=3)
+    if config.fcn_dropout:
         n.fcn_drop6 = L.Dropout(n.fcn_relu6, dropout_ratio=0.5, in_place=True)
         n.fcn_fc7, n.fcn_relu7 = conv_relu(n.fcn_drop6, 4096, ks=1, pad=0)
         n.fcn_drop7 = L.Dropout(n.fcn_relu7, dropout_ratio=0.5, in_place=True)
@@ -166,7 +115,6 @@ def generate_model(split, config):
     else:
         n.fcn_scores = conv(n.fcn_relu1, 1, ks=1, pad=0)
 
-    """
     n.upscores = L.Deconvolution(n.fcn_scores, 
                                  convolution_param=dict(num_output=1,
                                                         kernel_size=64,
@@ -181,6 +129,7 @@ def generate_model(split, config):
                                                         stride=32,
                                                         pad=16,
                                                         bias_term=False))
+    """
 
     # Loss Layer
     n.loss = L.SigmoidCrossEntropyLoss(n.upscores, n.label)

@@ -44,9 +44,8 @@ def run_prefetch(prefetch_queue, folder_name, prefix, num_batch, shuffle):
         
         # process the batch
         text_seq_val = batch['text_seq_batch']
-        cont_val = create_cont(text_seq_val)
-        imcrop_val = batch['imcrop_batch'].astype(np.float32) - segmodel.channel_mean
-        imcrop_val = imcrop_val.transpose((0, 3, 1, 2))
+        cont_val = batch['cont_batch']
+        imcrop_val = batch['feature_batch'].astype(np.float32)
         spatial_val = generate_spatial_batch(config.N, config.featmap_H, config.featmap_W)
         spatial_val = spatial_val.transpose((0, 3, 1, 2))
         label_val = batch['label_coarse_batch'].astype(np.float32)
@@ -113,7 +112,7 @@ class ReferitDataProviderLayer(caffe.Layer):
         self.split = params['split']
         top[0].reshape(config.T, self.batch_size)
         top[1].reshape(config.T, self.batch_size)
-        top[2].reshape(self.batch_size, 3, config.input_H, config.input_W)
+        top[2].reshape(self.batch_size, 2048, config.featmap_H, config.featmap_W)
         top[3].reshape(self.batch_size, 8, config.featmap_H, config.featmap_W)
         top[4].reshape(self.batch_size, 1, config.featmap_H, config.featmap_W)
 

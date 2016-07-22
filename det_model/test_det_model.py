@@ -25,7 +25,7 @@ def inference(config):
     caffe.set_mode_gpu()
 
     # Load pretrained model
-    net = caffe.Net('./det_model/text.prototxt',
+    net = caffe.Net('./det_model/test.prototxt',
                     config.pretrained_model,
                     caffe.TEST)
 
@@ -108,9 +108,20 @@ def inference(config):
         spatial_val[:num_proposal, ...] = \
             processing_tools.spatial_feature_from_bbox(bbox_proposals, imsize)
 
-        resnet.blobs['data'].data[...] = imcrop_val_trans
+        total_blob = []
+        resnet.blobs['data'].data[...] = imcrop_val_trans[:25]
         resnet.forward()
-        feature = resnet.blobs['res5c'].data[...].copy()
+        total_blob.append(resnet.blobs['res5c'].data[...].copy())
+        resnet.blobs['data'].data[...] = imcrop_val_trans[25:50]
+        resnet.forward()
+        total_blob.append(resnet.blobs['res5c'].data[...].copy())
+        resnet.blobs['data'].data[...] = imcrop_val_trans[50:75]
+        resnet.forward()
+        total_blob.append(resnet.blobs['res5c'].data[...].copy())
+        resnet.blobs['data'].data[...] = imcrop_val_trans[75:]
+        resnet.forward()
+        total_blob.append(resnet.blobs['res5c'].data[...].copy())
+        feature = np.concatenate(total_blob)
 
         # Extract textual features from sentences
         for imcrop_name, gt_bbox, description in flat_query_dict[imname]:

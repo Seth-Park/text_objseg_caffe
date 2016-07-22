@@ -13,19 +13,18 @@ class Config():
         self.mlp_hidden_dims = 500
 
         # Training Params
-        self.gpu_id = 2 
+        self.gpu_id = 6
         self.max_iter = 30000
 
-        self.weights = '/x/dhpseth/text_objseg_caffe/snapshots/det/_iter_15000.caffemodel' # set as None if training from scratch
-        self.fix_vgg = True  # set False to finetune VGG net
-        self.vgg_dropout = False
+        self.weights = '/mnt/coelacanth/seth/text_objseg_caffe/snapshots/res_det/_iter_50000.caffemodel' # set as None if training from scratch
+        self.fcn_dropout = False
         self.mlp_dropout = False
 
         # Data Params
         self.data_provider = 'referit_data_provider'
         self.data_provider_layer = 'ReferitDataProviderLayer'
 
-        self.data_folder = './referit/data/train_batch_seg/'
+        self.data_folder = './referit/data/train_batch_seg_resnet/'
         self.data_prefix = 'referit_train_seg'
 
 

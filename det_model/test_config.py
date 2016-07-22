@@ -14,8 +14,8 @@ class Config():
         self.mlp_dropout = False
 
         # Testing Params
-        self.gpu_id = 1
-        self.pretrained_model = '/x/dhpseth/text_objseg_caffe/snapshots/det/_iter_25000.caffemodel'
+        self.gpu_id = 5
+        self.pretrained_model = '/mnt/coelacanth/seth/text_objseg_caffe/snapshots/res_det/_iter_50000.caffemodel'
 
         self.resnet_prototxt = '/home/dhpseth/vqa/00_data_preprocess/ResNet-152-deploy.prototxt'
         self.resnet_mean_path = '/home/dhpseth/vqa/00_data_preprocess/ResNet_mean.binaryproto'

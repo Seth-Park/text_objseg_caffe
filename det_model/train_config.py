@@ -2,7 +2,7 @@ class Config():
     def __init__(self):
         # Model Params
         self.T = 20
-        self.N = 50
+        self.N = 25 
         self.input_H = 224 
         self.input_W = 224 
         self.featmap_H = (self.input_H // 32)
@@ -22,7 +22,7 @@ class Config():
         self.data_provider = 'referit_data_provider'
         self.data_provider_layer = 'ReferitDataProviderLayer'
 
-        self.data_folder = './referit/data/train_batch_det/'
+        self.data_folder = './referit/data/train_batch_det_resnet/'
         self.data_prefix = 'referit_train_det'
 
 

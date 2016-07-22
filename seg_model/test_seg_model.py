@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import sys
 import os;
 import skimage.io
+import cv2
 import numpy as np
 import caffe
 import json
@@ -29,6 +30,17 @@ def inference(config):
     net = caffe.Net('./seg_model/test.prototxt',
                     config.pretrained_model,
                     caffe.TEST)
+
+    # Load ResNet
+    resnet = caffe.Net(config.resnet_prototxt,
+                       config.resnet_caffemodel,
+                       caffe.TEST)
+
+    # ResNet mean
+    blob = caffe.proto.caffe_pb2.BlobProto()
+    data = open(config.resnet_mean_path, 'rb').read()
+    resnet_mean = np.array(caffe.io.blobproto_to_array(blob)).astype(np.float32).reshape(3, 224, 224)
+    resnet_mean = cv2.resize(resnet_mean.transpose((1,2,0)), (config.input_H, config.input_W))
 
     ################################################################################
     # Load annotations and bounding box proposals
@@ -81,14 +93,19 @@ def inference(config):
         if processed_im.ndim == 2:
             processed_im = np.tile(processed_im[:, :, np.newaxis], (1, 1, 3))
 
-        imcrop_val[...] = processed_im.astype(np.float32) - seg_model.channel_mean
-        imcrop_val_trans = imcrop_val.transpose((0, 3, 1, 2))
+        imcrop_val[...] = processed_im.astype(np.float32)
+        imcrop_val_trans = imcrop_val.transpose((0, 3, 1, 2)) - resnet_mean
 
         # Extract spatial features
         spatial_val = processing_tools.generate_spatial_batch(config.N,
                                                               config.featmap_H,
                                                               config.featmap_W)
         spatial_val = spatial_val.transpose((0, 3, 1, 2))
+
+        # Extract ResNet features
+        resnet.blobs['data'].data[...] = imcrop_val_trans
+        resnet.forward()
+        feature = resnet.blobs['res5c'].data[...].copy()
 
         for imcrop_name, _, description in flat_query_dict[imname]:
             mask = load_gt_mask(config.mask_dir + imcrop_name + '.mat').astype(np.float32)
@@ -101,7 +118,7 @@ def inference(config):
 
             net.blobs['language'].data[...] = text_seq_val
             net.blobs['cont'].data[...] = cont_val
-            net.blobs['image'].data[...] = imcrop_val_trans
+            net.blobs['image'].data[...] = feature
             net.blobs['spatial'].data[...] = spatial_val
             net.blobs['label'].data[...] = processed_labels
 
