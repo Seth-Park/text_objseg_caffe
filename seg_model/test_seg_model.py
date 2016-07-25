@@ -39,8 +39,10 @@ def inference(config):
     # ResNet mean
     blob = caffe.proto.caffe_pb2.BlobProto()
     data = open(config.resnet_mean_path, 'rb').read()
+    blob.ParseFromString(data)
     resnet_mean = np.array(caffe.io.blobproto_to_array(blob)).astype(np.float32).reshape(3, 224, 224)
     resnet_mean = cv2.resize(resnet_mean.transpose((1,2,0)), (config.input_H, config.input_W))
+    resnet_mean = resnet_mean.transpose((2,0,1))
 
     ################################################################################
     # Load annotations and bounding box proposals

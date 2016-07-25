@@ -14,9 +14,9 @@ class Config():
 
         # Training Params
         self.gpu_id = 7
-        self.max_iter = 50000
+        self.max_iter = 25000
 
-        self.weights = '/mnt/coelacanth/seth/text_objseg_caffe/snapshots/res_low_res_seg/_iter_50000.caffemodel'  # set as None if training from scratch
+        self.weights = '/mnt/coelacanth/seth/text_objseg_caffe/snapshots/res_low_res_seg/_iter_30000.caffemodel'  # set as None if training from scratch
         self.fcn_dropout = False
         self.mlp_dropout = False
 

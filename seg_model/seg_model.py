@@ -67,7 +67,7 @@ def generate_model(split, config):
 
 
     # fully conv
-    n.fcn_fc6, n.fcn_relu6 = conv_relu(n.image, 4096, ks=7, pad=3)
+    n.fcn_fc6, n.fcn_relu6 = conv_relu(n.image, 2048, ks=7, pad=3)
     if config.fcn_dropout:
         n.fcn_drop6 = L.Dropout(n.fcn_relu6, dropout_ratio=0.5, in_place=True)
         n.fcn_fc7, n.fcn_relu7 = conv_relu(n.fcn_drop6, 4096, ks=1, pad=0)
@@ -96,16 +96,16 @@ def generate_model(split, config):
     n.lstm_feat = L.Reshape(n.lstm_out, reshape_param=dict(shape=dict(dim=[-1, config.lstm_dim])))
 
     # Tile LSTM feature
-    n.lstm_resh = L.Reshape(n.lstm_feat, reshape_param=dict(shape=dict(dim=[-1, config.lstm_dim, 1, 1])))
+    n.lstm_l2norm = L.L2Normalize(n.lstm_feat)
+    n.lstm_resh = L.Reshape(n.lstm_l2norm, reshape_param=dict(shape=dict(dim=[-1, config.lstm_dim, 1, 1])))
     n.lstm_tile_1 = L.Tile(n.lstm_resh, axis=2, tiles=config.featmap_H)
     n.lstm_tile_2 = L.Tile(n.lstm_tile_1, axis=3, tiles=config.featmap_W)
 
     # L2 Normalize image and language features
     n.img_l2norm = L.L2Normalize(n.fcn_fc8)
-    n.lstm_l2norm = L.L2Normalize(n.lstm_tile_2)
 
     # Concatenate
-    n.feat_all = L.Concat(n.lstm_l2norm, n.img_l2norm, n.spatial, concat_param=dict(axis=1))
+    n.feat_all = L.Concat(n.lstm_tile_2, n.img_l2norm, n.spatial, concat_param=dict(axis=1))
 
     # MLP Classifier over concatenated feature
     n.fcn_l1, n.fcn_relu1 = conv_relu(n.feat_all, config.mlp_hidden_dims, ks=1, pad=0)

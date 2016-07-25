@@ -11,6 +11,3 @@ momentum: 0.9
 momentum2: 0.999
 weight_decay: 0.0005
 lr_policy: "fixed"
-
-# accumulate gradients
-#iter_size: 2
